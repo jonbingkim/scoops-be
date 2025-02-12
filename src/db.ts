@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Example server-side log
+
 console.log("Initializing Supabase client...")
 
 const supabaseUrl: string = 'https://mwzjrzamnrhmkdnpvixa.supabase.co'
@@ -12,7 +12,7 @@ if (!supabaseKey) {
   throw new Error('SUPABASE_KEY is missing in the environment variables.')
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+export const supabase = createClient(supabaseUrl, supabaseKey)
 
 
 console.log("Supabase client successfully created!")
