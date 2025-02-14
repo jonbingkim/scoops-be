@@ -11,6 +11,9 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 app.use(express.json());
+
+
+
 app.post('/suggestion', async (req, res) => {
     const text = req.body.text;
     if (!text || typeof text !== 'string') {

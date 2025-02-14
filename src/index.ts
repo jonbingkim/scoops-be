@@ -1,9 +1,9 @@
 import express from 'express';
+import cors from "cors";
 import 'dotenv/config';
 import { type Request, type Response } from 'express';
-import { OpenAI } from 'openai';
 import axios from 'axios';
-import { supabase } from './db.ts'
+import { supabase } from './db.ts';
 
 const app = express();
 const port = 3000;
@@ -11,15 +11,10 @@ const port = 3000;
 const API_URL = 'https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze';
 const API_KEY = process.env.GOOGLE_API_KEY;
 
-//come back to this later, maybe not really useful bc perspective is good :)
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
-
-app.use()
+app.use(cors());
 app.use(express.json());
 
-app.post('/suggestion', async (req: Request, res: Response) : Promise<any>=> {
+app.post('/suggestion', async (req: Request, res: Response): Promise<any> => {
   const text = req.body.text;
 
   if (!text || typeof text !== 'string') {
@@ -33,39 +28,49 @@ app.post('/suggestion', async (req: Request, res: Response) : Promise<any>=> {
 
   try {
     const response = await axios.post(`${API_URL}?key=${API_KEY}`, analyzeRequest);
-    const score = (response.data.attributeScores.TOXICITY.summaryScore.value);
-    if (score > .04) {
+    const score = response.data.attributeScores.TOXICITY.summaryScore.value;
+    console.log(`Toxicity Score: ${score}`);
+
+    if (score <= 0.04) {
       const { data, error } = await supabase
-    .from('flavors')
-    .insert([
-    { flavor: text },
-  ])
-  .select()
-}
-    // } else {
-    //   res.status
-    // }
-    console.log(response.data)
-    return res.status(200).json('flavor submitted succesfully!')
-    
+        .from('flavors')
+        .insert([{ flavor: text }]);
+
+      if (error) {
+        console.error('Supabase insert error:', error);
+        return res.status(500).json({ error: "Failed to insert flavor" });
+      }
+
+      console.log('Flavor submitted:', text);
+      return res.status(200).json({ message: 'Flavor submitted successfully!', data });
+    } else {
+      return res.status(400).json({ error: "Flavor contains inappropriate content" });
+    }
   } catch (err) {
     console.error('Error in Perspective API:', err);
     return res.status(500).json({ error: "Failed to analyze text" });
   }
 });
 
-app.get('/', async (req,res) => {
+app.get('/', async (req, res) => {
+  try {
+    let { data: flavors, error } = await supabase
+      .from('flavors')
+      .select('*');
 
-  let { data: flavors, error } = await supabase
-  .from('flavors')
-  .select('*')
-  console.log({flavors})
-  const flavorList = flavors.map(flavor => flavor.flavor)
-  res.send({flavors: flavorList});
+    if (error) {
+      console.error('Error fetching flavors:', error);
+      return res.status(500).json({ error: "Failed to fetch flavors" });
+    }
+
+    const flavorList = flavors.map(flavor => flavor.flavor);
+    res.json({ flavors: flavorList });
+  } catch (err) {
+    console.error('Error in GET /:', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
-
-
