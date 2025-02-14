@@ -31,7 +31,7 @@ app.post('/suggestion', async (req: Request, res: Response): Promise<any> => {
     const score = response.data.attributeScores.TOXICITY.summaryScore.value;
     console.log(`Toxicity Score: ${score}`);
 
-    if (score <= 0.04) {
+    if (score <= 0.15) {
       const { data, error } = await supabase
         .from('flavors')
         .insert([{ flavor: text }]);
@@ -42,13 +42,14 @@ app.post('/suggestion', async (req: Request, res: Response): Promise<any> => {
       }
 
       console.log('Flavor submitted:', text);
-      return res.status(200).json({ message: 'Flavor submitted successfully!', data });
+      return res.status(200).json({ message: 'Flavor submitted successfully!' });
     } else {
-      return res.status(400).json({ error: "Flavor contains inappropriate content" });
+      
+      return res.status(200).json({ error: "Flavor contains inappropriate content" });
     }
   } catch (err) {
     console.error('Error in Perspective API:', err);
-    return res.status(500).json({ error: "Failed to analyze text" });
+    return res.status(200).json({ error: "Failed to analyze text, Please try again" });
   }
 });
 
