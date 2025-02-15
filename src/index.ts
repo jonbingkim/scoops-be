@@ -3,7 +3,7 @@ import cors from "cors";
 import 'dotenv/config';
 import { type Request, type Response } from 'express';
 import axios from 'axios';
-import { supabase } from './db.ts';
+import { supabase } from './db';
 
 const app = express();
 const port = 3000;
@@ -53,7 +53,7 @@ app.post('/suggestion', async (req: Request, res: Response): Promise<any> => {
   }
 });
 
-app.get('/', async (req, res) => {
+app.get('/', async (req:any, res:any) => {
   try {
     let { data: flavors, error } = await supabase
       .from('flavors')

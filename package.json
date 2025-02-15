@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node poop/index.js",
+    "start": "node poop/index.js",
     "dev": "ts-node src/index.ts"
   },
   "type": "module",
