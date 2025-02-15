@@ -31,7 +31,7 @@ app.post('/suggestion', async (req: Request, res: Response): Promise<any> => {
     const score = response.data.attributeScores.TOXICITY.summaryScore.value;
     console.log(`Toxicity Score: ${score}`);
 
-    if (score <= 0.15) {
+    if (score <= 0.1) {
       const { data, error } = await supabase
         .from('flavors')
         .insert([{ flavor: text }]);
